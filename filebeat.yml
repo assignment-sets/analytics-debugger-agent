@@ -1,0 +1,20 @@
+filebeat.inputs:
+  - type: filestream
+    id: my-node-app-id
+    enabled: true
+    paths:
+      - /app/app.log
+    parsers:
+      - ndjson:
+          target: ""
+          add_error_key: true
+
+output.elasticsearch:
+  hosts: ["${ELASTIC_HOST}"]
+  api_key: "${ELASTIC_API_KEY}"
+
+setup.template.enabled: false
+
+setup.ilm.enabled: false
+setup.template.name: "node-logs"
+setup.template.pattern: "node-logs-*"
