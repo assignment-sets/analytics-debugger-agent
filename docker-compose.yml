@@ -8,7 +8,8 @@ services:
       - CLOUD_ID=${CLOUD_ID}
     volumes:
       - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - ./app.log:/app/app.log:ro
+      # Mount the whole directory to /app/ so Docker sees the live file updates
+      - ./:/app/:ro 
     command: >
       bash -c "
       filebeat setup -e -strict.perms=false;
