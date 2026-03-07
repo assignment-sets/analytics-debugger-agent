@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from 'uuid';
 const logger = pino({ level: 'info' });
 const pinoMiddleware = pinoHttp({
     logger,
-    genReqId: (req) => req.headers['x-trace-id'] || uuidv4(),
     redact: ['req.headers.cookie', 'req.headers.authorization'],
     customLogLevel: (req, res, err) => {
         if (res.statusCode >= 500 || err) return 'error';
@@ -26,6 +25,7 @@ app.use(express.json());
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'http://localhost:5678/webhook/incident-trigger';
 const N8N_API_KEY = process.env['X-N8N-API-KEY'] || process.env.X_N8N_API_KEY || '';
 
+// Standalone Trace ID injector
 app.use((req, res, next) => {
     req.traceId = req.headers['x-trace-id'] || uuidv4();
     next();
@@ -40,11 +40,11 @@ app.get('/api/data', (req, res) => {
 
 app.use(async (err, req, res, next) => {
     const traceId = req.traceId;
-
+    
     req.log.error({
         msg: "Critical Error Intercepted",
-        error: err.message,
-        stack: err.stack,
+        errorMessage: err.message,
+        errorStack: err.stack,
         traceId
     });
 
